@@ -746,7 +746,6 @@ function openArticle(id) {
   const body = lang==='ko' ? (col.body_ko||col.body_en) : (col.body_en||col.body_ko);
   const rt = col.read_time||'5';
   setHTML('art-body', `
-    <div class="art-cat ${catClass(col.category)}">${catLabel(col.category)}</div>
     <div class="art-title">${title}</div>
     <div class="art-meta">
       <strong>${col.author}</strong><span>·</span><span>${fmtDate(col.created_at)}</span><span>·</span><span>${rt}${T[lang].readTime}</span>
