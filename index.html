@@ -768,44 +768,51 @@ function updateProgress() {
 function closeAll() {}
 
 // ── EDITOR ──
-function openEditor(colId) {
+async function openEditor(colId) {
   if (!checkPassword(lang)) return;
   editingColumnId = colId || null;
-  // 수정 모드면 기존 내용 채우기
-  if (editingColumnId) {
-    const col = allColumns.find(c => c.id === editingColumnId);
-    if (col) {
-      document.getElementById('e-author').value = col.author || '';
-      document.getElementById('e-readtime').value = col.read_time || '';
-      document.getElementById('e-title-ko').value = col.title_ko || '';
-      document.getElementById('e-title-en').value = col.title_en || '';
-      document.getElementById('e-summary-ko').textContent = col.summary_ko || '';
-      document.getElementById('e-summary-en').textContent = col.summary_en || '';
-      // Quill 내용은 초기화 후 채움
-    }
-  } else {
-    clearEditor();
-  }
+
+  // 항상 먼저 초기화
+  clearEditor();
   document.getElementById('editor-page').classList.add('open');
   document.body.style.overflow = 'hidden';
-  if (!quillKo) {
-    setTimeout(() => {
-      initQuill();
-      if (editingColumnId) fillQuillContent();
-    }, 50);
-  } else if (editingColumnId) {
-    fillQuillContent();
-  }
-  // 에디터 헤더 타이틀 수정
+
   const t = T[lang];
   setEl('editor-hdr-title', editingColumnId ? (lang==='ko' ? '칼럼 수정' : 'Edit Column') : t.editorTitle);
+
+  if (!quillKo) {
+    setTimeout(async () => {
+      initQuill();
+      if (editingColumnId) await fillQuillContent();
+    }, 50);
+  } else {
+    if (editingColumnId) await fillQuillContent();
+  }
 }
 
-function fillQuillContent() {
-  const col = allColumns.find(c => c.id === editingColumnId);
+async function fillQuillContent() {
+  // DB에서 직접 최신 데이터 fetch (캐시 문제 방지)
+  let col;
+  try {
+    const { data } = await db.from('columns').select('*').eq('id', editingColumnId).single();
+    col = data;
+  } catch(e) {
+    col = allColumns.find(c => c.id === editingColumnId);
+  }
   if (!col) return;
+
+  // 텍스트 필드 채우기
+  document.getElementById('e-author').value = col.author || '';
+  document.getElementById('e-readtime').value = col.read_time || '';
+  document.getElementById('e-title-ko').value = col.title_ko || '';
+  document.getElementById('e-title-en').value = col.title_en || '';
+  document.getElementById('e-summary-ko').textContent = col.summary_ko || '';
+  document.getElementById('e-summary-en').textContent = col.summary_en || '';
+
+  // Quill 본문 채우기
   if (quillKo) quillKo.root.innerHTML = col.body_ko || '';
   if (quillEn) quillEn.root.innerHTML = col.body_en || '';
+
   // 썸네일 복원
   if (col.thumbnail) {
     thumbnailBase64 = col.thumbnail;
@@ -815,9 +822,9 @@ function fillQuillContent() {
   }
 }
 function closeEditor() {
-  if (!confirm(lang==='ko'?'작성 중인 내용이 사라집니다. 닫겠습니까?':'Close without saving?')) return;
   document.getElementById('editor-page').classList.remove('open');
   document.body.style.overflow = '';
+  editingColumnId = null;
   clearEditor();
 }
 function clearEditor() {
