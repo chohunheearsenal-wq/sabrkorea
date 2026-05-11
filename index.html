@@ -78,7 +78,8 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 .feat-img img{width:90px;height:90px;object-fit:contain;opacity:.2}
 .feat-img-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:2rem 1.5rem .8rem}
 .aitem-thumb{width:160px;height:105px;border-radius:4px;overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center}
-.aitem-thumb img{width:44px;height:44px;object-fit:contain;opacity:.15}
+.aitem-thumb img.logo-placeholder{width:44px;height:44px;object-fit:contain;opacity:.15}
+.aitem-thumb img.thumb-real{width:100%;height:100%;object-fit:cover;display:block;opacity:1}
 .aitem-body{display:flex;flex-direction:column;justify-content:space-between;padding:2px 0}
 .cat-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
 .cat-tag::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -125,8 +126,8 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 
 /* DRAWER (article reader) */
 .drw-bg{position:fixed;inset:0;z-index:980;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
-.drw-bg.open{background:rgba(0,0,0,.45);pointer-events:all}
-.drawer{position:fixed;top:0;right:0;bottom:0;z-index:990;width:min(640px,100vw);background:#fff;transform:translateX(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;border-left:1px solid var(--border);box-shadow:-4px 0 32px rgba(0,0,0,.1)}
+.drw-bg.open{background:rgba(0,0,0,.55);pointer-events:all}
+.drawer{position:fixed;top:0;left:0;right:0;bottom:0;z-index:990;width:100vw;max-width:860px;margin:0 auto;background:#fff;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;box-shadow:0 -4px 32px rgba(0,0,0,.1)}
 .drawer.open{transform:translateX(0)}
 .drw-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.75rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
 .drw-title{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--t1);text-transform:uppercase}
@@ -543,7 +544,7 @@ const T = {
     btnWrite:'칼럼 기고',
     heroEyebrow:'SABR 한국 챕터 공식 웹사이트',
     heroH1:'미국야구학회\n대한민국 지부',
-    heroDesc:'SABR 한국 챕터는 즐겁게 야구를 탐구하고자 하는 연구자와 팬들의 커뮤니티입니다.',
+    heroDesc:'SABR 한국 챕터는 즐겁게 야구를 탐구하고자 하는<br>연구자와 팬들의 커뮤니티입니다.',
     hstL:['전세계 회원','지역 챕터','창설 연도'],
     shHome:'최신 칼럼', shMore:'전체 보기 →', shCol:'칼럼 아카이브',
     sbRecent:'최신 칼럼', sbAbout:'소개',
@@ -622,7 +623,7 @@ function makeCard(col, idx, featured) {
     </div>`;
   }
   return `<div class="aitem" onclick="openArticle('${col.id}')">
-    <div class="aitem-thumb">${col.thumbnail ? `<img src="${col.thumbnail}" alt="" style="width:100%;height:100%;object-fit:cover">` : `<img src="${LOGO_SRC}" alt="">`}</div>
+    <div class="aitem-thumb">${col.thumbnail ? `<img class="thumb-real" src="${col.thumbnail}" alt="">` : `<img class="logo-placeholder" src="${LOGO_SRC}" alt="">`}</div>
     <div class="aitem-body">
       <div class="cat-tag ${catClass(col.category)}">${catLabel(col.category)}</div>
       <div class="aitem-title">${title}</div>
@@ -666,7 +667,7 @@ function setLang(l) {
   navIds.forEach((id,i) => setEl(id, t.nav[i]));
   setEl('hero-eyebrow', t.heroEyebrow);
   setEl('hero-h1', t.heroH1);
-  setEl('hero-desc', t.heroDesc);
+  setHTML('hero-desc', t.heroDesc);
   t.hstL.forEach((lb,i) => setEl('hst-l'+(i+1), lb));
   setEl('sh-home', t.shHome); setEl('sh-more', t.shMore); setEl('sh-col', t.shCol);
   setEl('sb-recent-title', t.sbRecent); setEl('sb-about-title', t.sbAbout);
@@ -878,6 +879,17 @@ function showToast(msg) {
 
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeAll(); });
+
+// ── FIX: PASTE SCROLL BUG ──
+// When pasting inside editor-page, prevent window from jumping to top
+document.addEventListener('paste', (e) => {
+  const editorPage = document.getElementById('editor-page');
+  if (editorPage && editorPage.classList.contains('open')) {
+    const origScrollTo = window.scrollTo.bind(window);
+    window.scrollTo = () => {};
+    setTimeout(() => { window.scrollTo = origScrollTo; }, 300);
+  }
+}, true);
 
 // ── INIT ──
 (async () => {
