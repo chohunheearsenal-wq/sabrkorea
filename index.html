@@ -78,8 +78,8 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 .feat-img img{width:90px;height:90px;object-fit:contain;opacity:.2}
 .feat-img-label{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:2rem 1.5rem .8rem}
 .aitem-thumb{width:160px;height:105px;border-radius:4px;overflow:hidden;flex-shrink:0;background:var(--bg2);display:flex;align-items:center;justify-content:center}
-.aitem-thumb img.logo-placeholder{width:44px;height:44px;object-fit:contain;opacity:.15}
-.aitem-thumb img.thumb-real{width:100%;height:100%;object-fit:cover;display:block;opacity:1}
+.aitem-thumb img..logo-placeholder{width:44px;height:44px;object-fit:contain;opacity:.15}
+.aitem-thumb img..thumb-real{width:100%;height:100%;object-fit:cover;display:block;opacity:1}
 .aitem-body{display:flex;flex-direction:column;justify-content:space-between;padding:2px 0}
 .cat-tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
 .cat-tag::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
@@ -854,7 +854,6 @@ async function publishColumn() {
   const bodyEn = quillEn ? quillEn.root.innerHTML : '';
   const summaryKo = document.getElementById('e-summary-ko').textContent.trim();
   const summaryEn = document.getElementById('e-summary-en').textContent.trim();
-  const cat = 'general';
   const rt = document.getElementById('e-readtime').value || '5';
 
   if (!author || !titleKo) { showToast(T[lang].toastErr); return; }
@@ -863,41 +862,48 @@ async function publishColumn() {
   btn.disabled = true;
   btn.textContent = T[lang].toastSaving;
 
+  const payload = {
+    title_ko: titleKo,
+    title_en: titleEn || titleKo,
+    body_ko: bodyKo,
+    body_en: bodyEn || bodyKo,
+    summary_ko: summaryKo || titleKo.slice(0, 60),
+    summary_en: summaryEn || titleEn.slice(0, 60) || titleKo.slice(0, 60),
+    author,
+    read_time: rt,
+    thumbnail: thumbnailBase64 || null
+  };
+
   try {
-    let error;
-    if (editingColumnId) {
-      // 수정 모드
-      ({ error } = await db.from('columns').update({
-        title_ko: titleKo, title_en: titleEn||titleKo,
-        body_ko: bodyKo, body_en: bodyEn||bodyKo,
-        summary_ko: summaryKo||titleKo.slice(0,60),
-        summary_en: summaryEn||titleEn.slice(0,60)||titleKo.slice(0,60),
-        author, read_time: rt,
-        thumbnail: thumbnailBase64||null
-      }).eq('id', editingColumnId));
+    const isEdit = !!editingColumnId;
+    let result;
+
+    if (isEdit) {
+      result = await db.from('columns').update(payload).eq('id', editingColumnId).select();
     } else {
-      // 신규 등록
-      ({ error } = await db.from('columns').insert({
-        title_ko: titleKo, title_en: titleEn||titleKo,
-        body_ko: bodyKo, body_en: bodyEn||bodyKo,
-        summary_ko: summaryKo||titleKo.slice(0,60),
-        summary_en: summaryEn||titleEn.slice(0,60)||titleKo.slice(0,60),
-        author, category: cat, read_time: rt,
-      thumbnail: thumbnailBase64||null
-      }));
+      payload.category = 'general';
+      result = await db.from('columns').insert(payload).select();
     }
-    if (error) throw error;
-    // Reload columns
+
+    if (result.error) throw result.error;
+
+    // 성공
+    const successMsg = isEdit
+      ? (lang === 'ko' ? '✓ 칼럼이 수정됐습니다!' : '✓ Column updated!')
+      : T[lang].toastOk;
+
+    editingColumnId = null;
     allColumns = await fetchColumns();
-    renderHome(); renderAll();
+    renderHome();
+    renderAll();
     document.getElementById('editor-page').classList.remove('open');
     document.body.style.overflow = '';
     clearEditor();
-    showToast(editingColumnId ? (lang==='ko' ? '✓ 칼럼이 수정됐습니다!' : '✓ Column updated!') : T[lang].toastOk);
-    editingColumnId = null;
+    showToast(successMsg);
+
   } catch(e) {
-    console.error(e);
-    showToast('오류가 발생했습니다: ' + e.message);
+    console.error('Save error:', e);
+    showToast('저장 오류: ' + (e.message || JSON.stringify(e)));
   } finally {
     btn.disabled = false;
     btn.textContent = T[lang].btnPublish;
