@@ -145,7 +145,7 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 .art-body p{margin-bottom:1.2rem}
 
 /* EDITOR PAGE (fullscreen) */
-.editor-page{position:fixed;inset:0;z-index:995;background:#fff;display:none;flex-direction:column}
+.editor-page{position:fixed;inset:0;z-index:995;background:#fff;display:none;flex-direction:column;overflow:hidden}
 .editor-page.open{display:flex}
 .editor-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;border-bottom:1px solid var(--border);background:#fff;flex-shrink:0}
 .editor-hdr-title{font-size:14px;font-weight:700;color:var(--t1)}
@@ -167,7 +167,7 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 .editor-quill-wrap{padding:0 2rem}
 .ql-container{border:none !important;font-family:var(--sans) !important}
 .ql-toolbar{border:none !important;border-bottom:1px solid var(--border) !important;padding:6px 0 !important;position:sticky;top:0;background:#fff;z-index:1;flex-wrap:wrap}
-.ql-editor{font-family:var(--sans) !important;font-size:15px !important;line-height:2 !important;color:var(--t2) !important;min-height:400px;padding:1.5rem 0 !important}
+.ql-editor{font-family:var(--sans) !important;font-size:15px !important;line-height:2 !important;color:var(--t2) !important;min-height:600px;padding:1.5rem 0 4rem !important}
 .ql-editor p{margin-bottom:1rem}
 [contenteditable]:empty:before{content:attr(data-placeholder);color:var(--t3);pointer-events:none}
 .ql-editor h2{font-family:var(--sans);font-size:1.2rem;font-weight:700;color:var(--t1);margin:2rem 0 1rem}
@@ -399,7 +399,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <input type="number" id="e-readtime" placeholder="읽기 시간(분)" min="1" max="60" style="border:1px solid var(--border2);background:#fff;border-radius:var(--r);padding:7px 12px;font-family:var(--sans);font-size:13px;color:var(--t1);outline:none;width:130px">
   </div>
   <!-- KO editor -->
-  <div id="editor-ko" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
+  <div id="editor-ko" style="display:flex;flex-direction:column;flex:1;overflow-y:auto">
     <div class="editor-quill-wrap" style="padding:1.5rem 2rem .5rem">
       <input id="e-title-ko" class="editor-title-input" type="text" placeholder="제목을 입력하세요">
     </div>
@@ -409,7 +409,7 @@ document.addEventListener('DOMContentLoaded',function(){
     </div>
   </div>
   <!-- EN editor -->
-  <div id="editor-en" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+  <div id="editor-en" style="display:none;flex-direction:column;flex:1;overflow-y:auto">
     <div class="editor-quill-wrap" style="padding:1.5rem 2rem .5rem">
       <input id="e-title-en" class="editor-title-input" type="text" placeholder="Enter title">
     </div>
