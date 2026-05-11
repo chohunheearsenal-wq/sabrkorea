@@ -125,17 +125,17 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 100%{transform:translateX(-50%)}}
 
 /* DRAWER (article reader) */
-.drw-bg{position:fixed;inset:0;z-index:980;background:rgba(0,0,0,0);pointer-events:none;transition:background .3s}
-.drw-bg.open{background:rgba(0,0,0,.55);pointer-events:all}
-.drawer{position:fixed;top:0;left:0;right:0;bottom:0;z-index:990;width:100vw;max-width:860px;margin:0 auto;background:#fff;transform:translateY(100%);transition:transform .4s cubic-bezier(.16,1,.3,1);display:flex;flex-direction:column;box-shadow:0 -4px 32px rgba(0,0,0,.1)}
-.drawer.open{transform:translateX(0)}
-.drw-hdr{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.75rem;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg2)}
-.drw-title{font-size:13px;font-weight:700;letter-spacing:.06em;color:var(--t1);text-transform:uppercase}
-.drw-close{width:32px;height:32px;border-radius:50%;background:#fff;border:1px solid var(--border);color:var(--t2);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.drw-close:hover{background:var(--t1);color:#fff;border-color:var(--t1)}
-.drw-body{flex:1;overflow-y:auto;padding:1.75rem}
-.drw-progress{height:2px;background:var(--border);flex-shrink:0}
-.drw-prog-bar{height:100%;background:var(--red);width:0%;transition:width .1s}
+
+
+
+
+
+
+
+
+
+
+
 
 /* ARTICLE READER */
 .art-cat{display:inline-flex;align-items:center;gap:5px;margin-bottom:1rem;font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
@@ -191,6 +191,17 @@ nav button.act{color:var(--navy);border-bottom-color:var(--red)}
 .btn-submit{width:100%;background:var(--navy);color:#fff;border:none;cursor:pointer;font-family:var(--sans);font-size:14px;font-weight:700;padding:13px;border-radius:var(--r);margin-top:.5rem;transition:background .15s}
 .btn-submit:hover{background:var(--navy2)}
 
+/* ARTICLE FULL PAGE */
+.article-page{display:none;min-height:100vh;background:#fff}
+.article-page.open{display:block}
+.art-page-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:50}
+.art-page-back{display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--t2);font-family:var(--sans);transition:color .15s}
+.art-page-back:hover{color:var(--navy)}
+.art-page-edit{background:none;border:1px solid var(--border2);color:var(--t2);font-size:12px;padding:6px 16px;border-radius:99px;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.art-page-edit:hover{border-color:var(--navy);color:var(--navy)}
+.art-page-inner{max-width:760px;margin:0 auto;padding:3rem 2rem 6rem}
+.art-prog{height:3px;background:var(--border);position:fixed;top:60px;left:0;right:0;z-index:49}
+.art-prog-bar{height:100%;background:var(--red);width:0%;transition:width .1s}
 /* TOAST */
 .toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);z-index:9999;background:var(--t1);color:#fff;padding:.85rem 1.5rem;border-radius:var(--r);font-size:13px;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 24px rgba(0,0,0,.12)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -217,7 +228,7 @@ footer a:hover{color:var(--navy)}
   .aitem-thumb{width:100px;height:70px}
   .aitem-title{font-size:13.5px}
   .abt-feats{grid-template-columns:1fr}
-  .drawer{width:100vw}
+
   .editor-meta{flex-direction:column;align-items:stretch}
   .editor-meta input.title-input{font-size:13px}
   .frow{grid-template-columns:1fr}
@@ -238,7 +249,7 @@ footer a:hover{color:var(--navy)}
   .ql-editor{min-height:300px}
   .ql-toolbar .ql-formats{margin-right:6px}
   #fab-write{bottom:1.5rem;right:1.5rem;width:50px;height:50px;font-size:1.3rem}
-  .drw-body{padding:1.25rem}
+
   .art-title{font-size:1.2rem}
 }
 </style>
@@ -371,15 +382,14 @@ document.addEventListener('DOMContentLoaded',function(){
   display:none;align-items:center;justify-content:center;
 " title="칼럼 기고">✏️</button>
 
-<!-- ARTICLE READER DRAWER -->
-<div class="drw-bg" id="drw-bg" onclick="closeAll()"></div>
-<div class="drawer" id="drw-article">
-  <div class="drw-progress"><div class="drw-prog-bar" id="prog-bar"></div></div>
-  <div class="drw-hdr">
-    <div class="drw-title" id="drw-read-title"></div>
-    <button class="drw-close" onclick="closeArticle()">✕</button>
+<!-- ARTICLE FULL PAGE -->
+<div class="article-page" id="article-page">
+  <div class="art-prog"><div class="art-prog-bar" id="prog-bar"></div></div>
+  <div class="art-page-hdr">
+    <button class="art-page-back" onclick="closeArticle()">← <span id="drw-read-title"></span></button>
+    <button class="art-page-edit" id="art-edit-btn" style="display:none"></button>
   </div>
-  <div class="drw-body" id="art-body" onscroll="updateProgress()"></div>
+  <div class="art-page-inner" id="art-body" onscroll="updateProgress()"></div>
 </div>
 
 <!-- EDITOR PAGE (fullscreen) -->
@@ -684,6 +694,7 @@ function setLang(l) {
 
 // ── PAGES ──
 function showPage(id) {
+  window._prevPage = id;
   ['home','columns','about'].forEach(p => {
     const el = document.getElementById('pg-'+p);
     if(el) {
@@ -724,21 +735,37 @@ function openArticle(id) {
       <button onclick="closeArticle();openEditor('${col.id}')" style="margin-left:auto;background:none;border:1px solid var(--border2);color:var(--t2);font-size:11px;padding:4px 12px;border-radius:99px;cursor:pointer;font-family:var(--sans)">${lang==='ko'?'수정':'Edit'}</button>
     </div>
     <div class="art-body">${body}</div>`);
-  document.getElementById('art-body').scrollTop = 0;
+  window.scrollTo(0, 0);
   document.getElementById('prog-bar').style.width = '0%';
-  document.getElementById('drw-article').classList.add('open');
-  document.getElementById('drw-bg').classList.add('open');
+  const artPage = document.getElementById('article-page');
+  artPage.classList.add('open');
+  // 모든 일반 페이지 숨기기
+  ['pg-home','pg-columns','pg-about'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el){ el.style.display='none'; el.style.visibility='hidden'; }
+  });
+  document.getElementById('fab-write').style.display = 'none';
+  // 스크롤 진행 업데이트 (window 기준)
+  window._artScrollHandler = () => updateProgress();
+  window.addEventListener('scroll', window._artScrollHandler);
 }
 function closeArticle() {
-  document.getElementById('drw-article').classList.remove('open');
-  document.getElementById('drw-bg').classList.remove('open');
+  document.getElementById('article-page').classList.remove('open');
+  if(window._artScrollHandler) {
+    window.removeEventListener('scroll', window._artScrollHandler);
+    window._artScrollHandler = null;
+  }
+  // 이전 페이지 복원
+  const prevPage = window._prevPage || 'home';
+  showPage(prevPage);
 }
 function updateProgress() {
-  const el = document.getElementById('art-body');
-  const pct = el.scrollTop / (el.scrollHeight - el.clientHeight) * 100;
-  document.getElementById('prog-bar').style.width = Math.min(100,pct) + '%';
+  const scrollTop = window.scrollY || document.documentElement.scrollTop;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight * 100) : 0;
+  document.getElementById('prog-bar').style.width = Math.min(100, pct) + '%';
 }
-function closeAll() { closeArticle(); }
+function closeAll() {}
 
 // ── EDITOR ──
 function openEditor(colId) {
