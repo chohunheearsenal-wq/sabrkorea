@@ -34,7 +34,7 @@ module.exports = async (req, res) => {
         const title   = escapeHtml(col.title_ko   || col.title_en   || 'SABR Korea');
         const desc    = escapeHtml(col.summary_ko  || col.summary_en || 'SABR 한국 챕터 칼럼');
         const pageUrl = `https://www.sabrkorea.com/col/${colId}`;
-        const imgUrl  = 'https://www.sabrkorea.com/logo.png';
+        const imgUrl  = `https://www.sabrkorea.com/api/thumb?col=${colId}`;
 
         html = html
           .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${title}">`)
