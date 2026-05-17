@@ -940,7 +940,7 @@ function openArticle(id) {
     </div>
     <div class="art-body">${body}</div>`);
   // URL 업데이트 (공유 가능한 링크)
-  history.pushState({colId: id}, '', '?col=' + id);
+  history.pushState({colId: id}, '', '/col/' + id);
   window.scrollTo(0, 0);
   document.getElementById('prog-bar').style.width = '0%';
   const artPage = document.getElementById('article-page');
@@ -962,7 +962,7 @@ function openArticle(id) {
 }
 function closeArticle() {
   currentArticleId = null;
-  history.pushState({}, '', window.location.pathname);
+  history.pushState({}, '', '/');
   const shareBtn = document.getElementById('art-share-btn');
   if (shareBtn) shareBtn.style.display = 'none';
   const artPage = document.getElementById('article-page');
@@ -1258,8 +1258,9 @@ function showToast(msg) {
 
 // 브라우저 뒤로가기/앞으로가기 지원
 window.addEventListener('popstate', (e) => {
+  const _ppath = window.location.pathname;
   const _p = new URLSearchParams(window.location.search);
-  const colId = _p.get('col');
+  const colId = _ppath.startsWith('/col/') ? _ppath.replace('/col/', '') : _p.get('col');
   const pageId = _p.get('page');
   if (colId) {
     openArticle(colId);
@@ -1294,7 +1295,7 @@ async function shareArticle(colId) {
   if (!col) return;
   const title = lang==='ko' ? (col.title_ko||col.title_en) : (col.title_en||col.title_ko);
   const desc  = lang==='ko' ? (col.summary_ko||col.summary_en||'') : (col.summary_en||col.summary_ko||'');
-  const url   = 'https://www.sabrkorea.com/?col=' + colId;
+  const url   = 'https://www.sabrkorea.com/col/' + colId;
 
   if (navigator.share) {
     // 모바일: 카카오톡·문자·메모 등 앱 선택창
@@ -1338,9 +1339,10 @@ document.addEventListener('paste', (e) => {
 
 // ── INIT ──
 (async () => {
-  // showPage가 URL을 바꾸기 전에 먼저 파라미터 읽기
+  // URL에서 칼럼 ID 또는 페이지 감지
+  const _path = window.location.pathname;
   const _params = new URLSearchParams(window.location.search);
-  const _urlCol = _params.get('col');
+  const _urlCol = _path.startsWith('/col/') ? _path.replace('/col/', '') : _params.get('col');
   const _urlPage = _params.get('page');
 
   allColumns = await fetchColumns();

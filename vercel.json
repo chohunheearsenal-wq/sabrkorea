@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/col/:id", "destination": "/api/og?col=:id" },
     { "source": "/(.*)", "destination": "/api/og" }
   ]
 }
