@@ -14,7 +14,10 @@
 <meta name="twitter:title" content="SABR Korea — 미국야구학회">
 <meta name="twitter:description" content="SABR 한국 챕터는 즐겁게 야구를 탐구하고자 하는 연구자와 팬들의 커뮤니티입니다.">
 <meta name="twitter:image" content="https://www.sabrkorea.com/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://suwyafmirxnmtaonxlqo.supabase.co">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <!-- Quill Editor -->
 <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet" media="print" onload="this.media='all'">
 <!-- Supabase -->
@@ -25,8 +28,8 @@
   --bg:#FFFFFF;--bg2:#F7F7F5;--bg3:#F0F0EC;
   --t1:#111111;--t2:#555555;--t3:#999999;
   --border:#E5E5E5;--border2:#D0D0D0;
-  --sans:-apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',sans-serif;
-  --serif:-apple-system,'Apple SD Gothic Neo','Malgun Gothic','맑은 고딕',sans-serif;
+  --sans:'Noto Sans KR',sans-serif;
+  --serif:'Noto Serif KR','Playfair Display',serif;
   --r:4px;--shadow:0 2px 12px rgba(0,0,0,.07);
 }
 html{scroll-behavior:smooth}
@@ -337,7 +340,7 @@ footer a:hover{color:var(--navy)}
 </head>
 <body>
 
-<script defer>
+<script>
 // 페이지 로드 즉시 모든 섹션 숨김
 document.addEventListener('DOMContentLoaded',function(){
   ['pg-home','pg-columns','pg-about'].forEach(function(id){
@@ -547,32 +550,15 @@ document.addEventListener('DOMContentLoaded',function(){
   <button onclick="imgDelete()" title="삭제" style="color:#f38ba8">✕</button>
 </div>
 
-<script>
+<script defer>
 // ── CONFIG ──
 const ADMIN_PW = 'sabrkorea123!';
 
 // ── SUPABASE ──
-// ── SUPABASE REST API (SDK 없이 직접 fetch) ──
-const SB_URL = 'https://suwyafmirxnmtaonxlqo.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1d3lhZm1pcnhubXRhb254bHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTA3ODYsImV4cCI6MjA5Mzk4Njc4Nn0.I0CCH7oP-6BvNS1XTDk0G2tRbLooKGh7vyy8ziP6P5c';
-const SB_H = { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
-const db = {
-  from: (table) => ({
-    select: (cols='*') => ({
-      order: (col, opts={}) => ({
-        _run: () => fetch(`${SB_URL}/rest/v1/${table}?select=${cols}&order=${col}.${opts.ascending?'asc':'desc'}`, {headers:SB_H}).then(r=>r.json()).then(data=>({data,error:null})).catch(e=>({data:null,error:e})),
-        then(res,rej){return this._run().then(res,rej);}
-      }),
-      eq: (col,val) => ({
-        single: () => fetch(`${SB_URL}/rest/v1/${table}?select=${cols}&${col}=eq.${encodeURIComponent(val)}`, {headers:{...SB_H,'Accept':'application/vnd.pgrst.object+json'}}).then(r=>r.json()).then(data=>({data,error:null})).catch(e=>({data:null,error:e})),
-        then(res,rej){return fetch(`${SB_URL}/rest/v1/${table}?select=${cols}&${col}=eq.${encodeURIComponent(val)}`,{headers:SB_H}).then(r=>r.json()).then(data=>({data,error:null})).then(res,rej);}
-      }),
-    }),
-    insert: (payload) => ({select:()=>fetch(`${SB_URL}/rest/v1/${table}`,{method:'POST',headers:SB_H,body:JSON.stringify(payload)}).then(r=>r.json()).then(data=>({data,error:null})).catch(e=>({data:null,error:e}))}),
-    update: (payload) => ({eq:(col,val)=>({select:()=>fetch(`${SB_URL}/rest/v1/${table}?${col}=eq.${encodeURIComponent(val)}`,{method:'PATCH',headers:SB_H,body:JSON.stringify(payload)}).then(r=>r.json()).then(data=>({data,error:null})).catch(e=>({data:null,error:e}))})}),
-    delete: () => ({eq:(col,val)=>fetch(`${SB_URL}/rest/v1/${table}?${col}=eq.${encodeURIComponent(val)}`,{method:'DELETE',headers:SB_H}).then(r=>({error:r.ok?null:new Error(r.status)})).catch(e=>({error:e}))})
-  })
-};
+const SB_URL='https://suwyafmirxnmtaonxlqo.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1d3lhZm1pcnhubXRhb254bHFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0MTA3ODYsImV4cCI6MjA5Mzk4Njc4Nn0.I0CCH7oP-6BvNS1XTDk0G2tRbLooKGh7vyy8ziP6P5c';
+const SB_H={'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'Content-Type':'application/json','Prefer':'return=representation'};
+const db={from:(t)=>({select:(c='*')=>({order:(col,o={})=>({_run:()=>fetch(`${SB_URL}/rest/v1/${t}?select=${c}&order=${col}.${o.ascending?'asc':'desc'}`,{headers:SB_H}).then(r=>r.json()).then(d=>({data:d,error:null})).catch(e=>({data:null,error:e})),then(res,rej){return this._run().then(res,rej);}}),eq:(col,val)=>({single:()=>fetch(`${SB_URL}/rest/v1/${t}?select=${c}&${col}=eq.${encodeURIComponent(val)}`,{headers:{...SB_H,'Accept':'application/vnd.pgrst.object+json'}}).then(r=>r.json()).then(d=>({data:d,error:null})).catch(e=>({data:null,error:e})),then(res,rej){return fetch(`${SB_URL}/rest/v1/${t}?select=${c}&${col}=eq.${encodeURIComponent(val)}`,{headers:SB_H}).then(r=>r.json()).then(d=>({data:d,error:null})).then(res,rej);}})}),insert:(p)=>({select:()=>fetch(`${SB_URL}/rest/v1/${t}`,{method:'POST',headers:SB_H,body:JSON.stringify(p)}).then(r=>r.json()).then(d=>({data:d,error:null})).catch(e=>({data:null,error:e}))}),update:(p)=>({eq:(col,val)=>({select:()=>fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${encodeURIComponent(val)}`,{method:'PATCH',headers:SB_H,body:JSON.stringify(p)}).then(r=>r.json()).then(d=>({data:d,error:null})).catch(e=>({data:null,error:e}))})}),delete:()=>({eq:(col,val)=>fetch(`${SB_URL}/rest/v1/${t}?${col}=eq.${encodeURIComponent(val)}`,{method:'DELETE',headers:SB_H}).then(r=>({error:r.ok?null:new Error(r.status)})).catch(e=>({error:e}))})})};
 
 // ── LOGO ──
 const LOGO_SRC = '/logo.png';
@@ -638,16 +624,14 @@ let editingColumnId = null;
 let currentArticleId = null;  // 현재 열린 칼럼 ID
 
 // ── QUILL INIT ──
-// Quill을 동적으로 로드 (에디터 열 때만)
-let quillLoaded = false;
-function loadQuillThenInit(callback) {
-  if (quillLoaded) { callback(); return; }
-  const script = document.createElement('script');
-  script.src = 'https://cdn.quilljs.com/1.3.7/quill.min.js';
-  script.onload = () => { quillLoaded = true; callback(); };
-  document.head.appendChild(script);
+let _quillLoaded=false;
+function loadQuillThenInit(cb){
+  if(_quillLoaded){cb();return;}
+  const s=document.createElement('script');
+  s.src='https://cdn.quilljs.com/1.3.7/quill.min.js';
+  s.onload=()=>{_quillLoaded=true;cb();};
+  document.head.appendChild(s);
 }
-
 function initQuill() {
   const opts = {
     theme: 'snow',
@@ -1011,9 +995,7 @@ async function openEditor(colId) {
   document.getElementById('btn-delete').style.display = editingColumnId ? 'inline-block' : 'none';
 
   loadQuillThenInit(async () => {
-    if (!quillKo) {
-      initQuill();
-    }
+    if (!quillKo) initQuill();
     if (editingColumnId) await fillQuillContent();
   });
 }
