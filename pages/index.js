@@ -132,6 +132,7 @@ export default function Home({ initialColumns }) {
   const [editTarget, setEditTarget] = useState(null)
   const [colPage, setColPage] = useState(1)
   const COL_PER_PAGE = 10
+  const [articleBody, setArticleBody] = useState({ ko: '', en: '' })
   const [progress, setProgress] = useState(0)
   const [toast, setToast] = useState('')
   const prevPageRef = useRef('home')
@@ -201,8 +202,16 @@ export default function Home({ initialColumns }) {
   const openArticle = (id) => {
     setOpenColId(id)
     setProgress(0)
+    setArticleBody({ ko: '', en: '' })
     history.pushState({ colId: id }, '', `/col/${id}`)
     window.scrollTo(0, 0)
+    // body를 별도 fetch (getServerSideProps에서 누락될 수 있음)
+    fetch(`/api/columns/${id}`)
+      .then(r => r.json())
+      .then(col => {
+        if (col) setArticleBody({ ko: col.body_ko || '', en: col.body_en || '' })
+      })
+      .catch(() => {})
   }
 
   const closeArticle = () => {
@@ -263,9 +272,6 @@ export default function Home({ initialColumns }) {
           })}
         </nav>
         <div className="hdr-right">
-          <button className="btn-write" onClick={() => { setEditTarget(null); setShowEditor(true) }}>
-            + {t.btnWrite}
-          </button>
           <div className="lang-sw">
             <button className={`lbtn${lang === 'ko' ? ' on' : ''}`} onClick={() => setLang('ko')}>KO</button>
             <button className={`lbtn${lang === 'en' ? ' on' : ''}`} onClick={() => setLang('en')}>EN</button>
@@ -278,7 +284,9 @@ export default function Home({ initialColumns }) {
   // ── 아티클 뷰 ──
   if (openColId && openCol) {
     const title = lang === 'ko' ? (openCol.title_ko || openCol.title_en) : (openCol.title_en || openCol.title_ko)
-    const body = lang === 'ko' ? (openCol.body_ko || openCol.body_en || '') : (openCol.body_en || openCol.body_ko || '')
+    const body = lang === 'ko'
+      ? (articleBody.ko || openCol.body_ko || openCol.body_en || '')
+      : (articleBody.en || openCol.body_en || openCol.body_ko || '')
 
     return (
       <>
