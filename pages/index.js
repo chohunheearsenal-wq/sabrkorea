@@ -130,6 +130,8 @@ export default function Home({ initialColumns }) {
   const [openColId, setOpenColId] = useState(null)
   const [showEditor, setShowEditor] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
+  const [colPage, setColPage] = useState(1)
+  const COL_PER_PAGE = 10
   const [progress, setProgress] = useState(0)
   const [toast, setToast] = useState('')
   const prevPageRef = useRef('home')
@@ -190,6 +192,7 @@ export default function Home({ initialColumns }) {
     prevPageRef.current = id
     setPage(id)
     setOpenColId(null)
+    if (id === 'columns') setColPage(1)
     const urls = { home: '/', columns: '?page=columns', about: '?page=about' }
     history.pushState({ page: id }, '', urls[id] || '/')
     window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -449,14 +452,52 @@ export default function Home({ initialColumns }) {
                   <div className="empty-d">{t.emptyD}</div>
                 </div>
               ) : (
-                columns.map((col, i) => (
-                  <ColCard key={col.id} col={col} lang={lang} onClick={() => openArticle(col.id)} />
-                ))
+                <>
+                  {columns.slice((colPage - 1) * COL_PER_PAGE, colPage * COL_PER_PAGE).map(col => (
+                    <ColCard key={col.id} col={col} lang={lang} onClick={() => openArticle(col.id)} />
+                  ))}
+
+                  {/* 페이지네이션 */}
+                  {columns.length > COL_PER_PAGE && (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '2rem 0 1rem' }}>
+                      <button
+                        onClick={() => { setColPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                        disabled={colPage === 1}
+                        style={{ background: 'none', border: '1px solid var(--border2)', color: 'var(--t2)', fontSize: '13px', padding: '7px 14px', borderRadius: '6px', cursor: colPage === 1 ? 'not-allowed' : 'pointer', opacity: colPage === 1 ? 0.4 : 1, fontFamily: 'var(--sans)' }}>
+                        ←
+                      </button>
+                      {Array.from({ length: Math.ceil(columns.length / COL_PER_PAGE) }, (_, i) => i + 1).map(n => (
+                        <button key={n}
+                          onClick={() => { setColPage(n); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                          style={{ background: colPage === n ? 'var(--navy)' : 'none', color: colPage === n ? '#fff' : 'var(--t2)', border: '1px solid', borderColor: colPage === n ? 'var(--navy)' : 'var(--border2)', fontSize: '13px', padding: '7px 13px', borderRadius: '6px', cursor: 'pointer', fontFamily: 'var(--sans)', minWidth: '36px' }}>
+                          {n}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => { setColPage(p => Math.min(Math.ceil(columns.length / COL_PER_PAGE), p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                        disabled={colPage === Math.ceil(columns.length / COL_PER_PAGE)}
+                        style={{ background: 'none', border: '1px solid var(--border2)', color: 'var(--t2)', fontSize: '13px', padding: '7px 14px', borderRadius: '6px', cursor: colPage === Math.ceil(columns.length / COL_PER_PAGE) ? 'not-allowed' : 'pointer', opacity: colPage === Math.ceil(columns.length / COL_PER_PAGE) ? 0.4 : 1, fontFamily: 'var(--sans)' }}>
+                        →
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
             </main>
             <aside className="sidebar" />
           </div>
         </div>
+      )}
+
+      {/* ── 칼럼 탭 FAB 작성 버튼 ── */}
+      {page === 'columns' && !openColId && (
+        <button
+          onClick={() => { setEditTarget(null); setShowEditor(true) }}
+          id="fab-write"
+          style={{ display: 'flex', position: 'fixed', bottom: '2rem', right: '2rem', zIndex: 200, background: 'var(--red)', color: '#fff', border: 'none', cursor: 'pointer', width: '56px', height: '56px', borderRadius: '50%', fontSize: '1.5rem', boxShadow: '0 4px 20px rgba(192,35,27,.4)', transition: 'transform .2s,box-shadow .2s', alignItems: 'center', justifyContent: 'center' }}
+          title={t.btnWrite}>
+          ✏️
+        </button>
       )}
 
       {/* ── 소개 ── */}
