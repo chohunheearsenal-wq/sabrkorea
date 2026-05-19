@@ -1,6 +1,6 @@
 import Head from 'next/head'
 import { useState, useEffect, useRef } from 'react'
-import { fetchColumns } from '../lib/supabase'
+import { fetchColumn, fetchColumns } from '../lib/supabase'
 import dynamic from 'next/dynamic'
 
 const Editor = dynamic(() => import('../components/Editor'), { ssr: false })
@@ -123,16 +123,19 @@ function Toast({ msg }) {
   return <div className={`toast${msg ? ' show' : ''}`}>{msg}</div>
 }
 
-export default function Home({ initialColumns }) {
+export default function Home({ initialColumns, _openColId = null, column = null }) {
   const [lang, setLangState] = useState('ko')
   const [page, setPage] = useState('home')
   const [columns, setColumns] = useState(initialColumns)
-  const [openColId, setOpenColId] = useState(null)
+  const [openColId, setOpenColId] = useState(_openColId)
   const [showEditor, setShowEditor] = useState(false)
   const [editTarget, setEditTarget] = useState(null)
   const [colPage, setColPage] = useState(1)
   const COL_PER_PAGE = 10
-  const [articleBody, setArticleBody] = useState({ ko: '', en: '' })
+  const [articleBody, setArticleBody] = useState({
+    ko: column?.body_ko || '',
+    en: column?.body_en || '',
+  })
   const [progress, setProgress] = useState(0)
   const [toast, setToast] = useState('')
   const prevPageRef = useRef('home')
@@ -205,9 +208,8 @@ export default function Home({ initialColumns }) {
     setArticleBody({ ko: '', en: '' })
     history.pushState({ colId: id }, '', `/col/${id}`)
     window.scrollTo(0, 0)
-    // body를 별도 fetch (getServerSideProps에서 누락될 수 있음)
-    fetch(`/api/columns/${id}`)
-      .then(r => r.json())
+    // 클라이언트 사이드에서 body 직접 fetch
+    fetchColumn(id)
       .then(col => {
         if (col) setArticleBody({ ko: col.body_ko || '', en: col.body_en || '' })
       })
