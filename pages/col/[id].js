@@ -1,19 +1,26 @@
+import Head from 'next/head'
 import { fetchColumn, fetchColumns } from '../../lib/supabase'
 import Home from '../index'
 
 export async function getServerSideProps({ params }) {
   try {
-    const [col, allCols] = await Promise.all([fetchColumn(params.id), fetchColumns()])
-    return { props: { initialColumns: allCols || [], openColId: params.id, column: col || null } }
+    const [col, allCols] = await Promise.all([
+      fetchColumn(params.id),
+      fetchColumns()
+    ])
+    return {
+      props: {
+        initialColumns: allCols || [],
+        openColId: params.id,
+        column: col || null
+      }
+    }
   } catch (e) {
-    return { props: { initialColumns: [], openColId: params.id, column: null } }
+    return {
+      props: { initialColumns: [], openColId: params.id, column: null }
+    }
   }
 }
-
-// /col/[id] 는 홈과 동일한 컴포넌트 사용하되 OG만 다름
-import Head from 'next/head'
-import { useState, useEffect } from 'react'
-import { fetchColumns as fc } from '../../lib/supabase'
 
 export default function ColPage({ initialColumns, openColId, column }) {
   const title = column?.title_ko || column?.title_en || 'SABR Korea'
