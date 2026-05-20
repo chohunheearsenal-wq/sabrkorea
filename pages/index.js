@@ -69,7 +69,7 @@ const T = {
   }
 }
 
-const HST_V = ['7,500+', '60+', '1971']
+const HST_V = ['7,500+', '70+', '1971']
 
 function fmtDate(d) {
   if (!d) return ''
