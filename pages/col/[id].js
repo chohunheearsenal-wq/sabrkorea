@@ -25,7 +25,6 @@ export async function getServerSideProps({ params }) {
 export default function ColPage({ initialColumns, openColId, column }) {
   const title = column?.title_ko || column?.title_en || 'SABR Korea'
   const desc = column?.summary_ko || column?.summary_en || 'SABR 한국 챕터 칼럼'
-
   return (
     <>
       <Head>
@@ -39,7 +38,7 @@ export default function ColPage({ initialColumns, openColId, column }) {
         <meta name="twitter:title" content={title} />
         <meta name="twitter:image" content={`https://www.sabrkorea.com/api/thumb?col=${openColId}`} />
       </Head>
-      <Home initialColumns={initialColumns} _openColId={openColId} />
+      <Home initialColumns={initialColumns} _openColId={openColId} column={column} />
     </>
   )
 }
