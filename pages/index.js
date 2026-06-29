@@ -141,13 +141,11 @@ export default function Home({ initialColumns, _openColId = null, column = null 
   const prevPageRef = useRef('home')
   const t = T[lang]
 
-  // 언어 복원
   useEffect(() => {
     const saved = localStorage.getItem('sabr_lang')
     if (saved) setLangState(saved)
   }, [])
 
-  // URL 라우팅
   useEffect(() => {
     const path = window.location.pathname
     const params = new URLSearchParams(window.location.search)
@@ -168,7 +166,6 @@ export default function Home({ initialColumns, _openColId = null, column = null 
     return () => window.removeEventListener('popstate', onPop)
   }, [])
 
-  // 스크롤 진행률 (아티클 뷰일 때)
   useEffect(() => {
     if (!openColId) return
     const onScroll = () => {
@@ -180,7 +177,6 @@ export default function Home({ initialColumns, _openColId = null, column = null 
     return () => window.removeEventListener('scroll', onScroll)
   }, [openColId])
 
-  // 토스트 자동 제거
   useEffect(() => {
     if (!toast) return
     const timer = setTimeout(() => setToast(''), 3000)
@@ -208,7 +204,6 @@ export default function Home({ initialColumns, _openColId = null, column = null 
     setArticleBody({ ko: '', en: '' })
     history.pushState({ colId: id }, '', `/col/${id}`)
     window.scrollTo(0, 0)
-    // 클라이언트 사이드에서 body 직접 fetch
     fetchColumn(id)
       .then(col => {
         if (col) setArticleBody({ ko: col.body_ko || '', en: col.body_en || '' })
@@ -252,7 +247,6 @@ export default function Home({ initialColumns, _openColId = null, column = null 
 
   const openCol = columns.find(c => String(c.id) === String(openColId))
 
-  // 칼럼 ID 있는데 아직 로드 안 된 경우
   if (openColId && !openCol) return null
 
   const NavHeader = () => (
@@ -309,7 +303,6 @@ export default function Home({ initialColumns, _openColId = null, column = null 
             <div className="art-prog-bar" style={{ width: `${progress}%` }} />
           </div>
           <div className="art-page-inner">
-            {/* 상단 버튼 */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
               <button onClick={closeArticle}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: 'var(--t2)', padding: '4px 8px 4px 0', lineHeight: 1 }}>
@@ -347,8 +340,15 @@ export default function Home({ initialColumns, _openColId = null, column = null 
             </a>
           </footer>
         </div>
+
+        {/* ✅ 핵심 수정: column → editColId, key 추가 */}
         {showEditor && (
-          <Editor column={editTarget} onSave={handleSave} onClose={() => { setShowEditor(false); setEditTarget(null) }} />
+          <Editor
+            key={editTarget?.id || 'new'}
+            editColId={editTarget?.id}
+            onSave={handleSave}
+            onClose={() => { setShowEditor(false); setEditTarget(null) }}
+          />
         )}
         <Toast msg={toast} />
       </>
@@ -466,8 +466,6 @@ export default function Home({ initialColumns, _openColId = null, column = null 
                   {columns.slice((colPage - 1) * COL_PER_PAGE, colPage * COL_PER_PAGE).map(col => (
                     <ColCard key={col.id} col={col} lang={lang} onClick={() => openArticle(col.id)} />
                   ))}
-
-                  {/* 페이지네이션 */}
                   {columns.length > COL_PER_PAGE && (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '2rem 0 1rem' }}>
                       <button
@@ -499,7 +497,7 @@ export default function Home({ initialColumns, _openColId = null, column = null 
         </div>
       )}
 
-      {/* ── 칼럼 탭 FAB 작성 버튼 ── */}
+      {/* ── 칼럼 탭 FAB ── */}
       {page === 'columns' && !openColId && (
         <button
           onClick={() => { setEditTarget(null); setShowEditor(true) }}
@@ -541,8 +539,14 @@ export default function Home({ initialColumns, _openColId = null, column = null 
         </a>
       </footer>
 
+      {/* ✅ 핵심 수정: column → editColId, key 추가 */}
       {showEditor && (
-        <Editor column={editTarget} onSave={handleSave} onClose={() => { setShowEditor(false); setEditTarget(null) }} />
+        <Editor
+          key={editTarget?.id || 'new'}
+          editColId={editTarget?.id}
+          onSave={handleSave}
+          onClose={() => { setShowEditor(false); setEditTarget(null) }}
+        />
       )}
       <Toast msg={toast} />
     </>
