@@ -311,7 +311,7 @@ export default function Home({ initialColumns, _openColId = null, column = null 
               <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button
                   className="art-edit-inline"
-                  onClick={() => { closeArticle(); setEditTarget(openCol); setShowEditor(true) }}
+                  onClick={() => { setEditTarget(openCol); setShowEditor(true) }}
                   style={{ background: 'none', border: '1px solid var(--border2)', color: 'var(--t2)', fontSize: '11px', padding: '4px 12px', borderRadius: '99px', cursor: 'pointer', fontFamily: 'var(--sans)' }}>
                   {t.editBtn}
                 </button>
