@@ -65,10 +65,9 @@ export default function Editor({ lang, onClose, onSave, editColId = null }) {
     loadQuill(() => setQuillReady(true))
   }, [authed])
 
-  // 2단계: Quill 준비되면 인스턴스 생성
+  // 2단계: Quill 인스턴스 생성만
   useEffect(() => {
     if (!quillReady) return
-    // DOM이 완전히 렌더링된 후 실행
     const timer = setTimeout(() => {
       if (!quillKoInst.current && quillKoRef.current) {
         quillKoInst.current = new window.Quill(quillKoRef.current, {
@@ -80,34 +79,37 @@ export default function Editor({ lang, onClose, onSave, editColId = null }) {
           ...QUILL_OPTS, placeholder: 'Write content here...'
         })
       }
-      // 3단계: 수정 모드면 기존 내용 로드
-      if (isEdit && !contentLoaded.current) {
-        contentLoaded.current = true
-        setLoading(true)
-        fetchColumn(editColId).then(col => {
-          if (!col) { setLoading(false); return }
-          setAuthor(col.author || '')
-          setTitleKo(col.title_ko || '')
-          setTitleEn(col.title_en || '')
-          if (col.thumbnail) {
-            setThumbnail(col.thumbnail)
-            setThumbPreview(col.thumbnail)
-          }
-          // Quill에 내용 삽입 (약간의 딜레이로 안정적 로딩)
-          setTimeout(() => {
-            if (quillKoInst.current && col.body_ko) {
-              quillKoInst.current.clipboard.dangerouslyPasteHTML(col.body_ko)
-            }
-            if (quillEnInst.current && col.body_en) {
-              quillEnInst.current.clipboard.dangerouslyPasteHTML(col.body_en)
-            }
-            setLoading(false)
-          }, 100)
-        })
-      }
     }, 100)
     return () => clearTimeout(timer)
   }, [quillReady])
+
+  // 3단계: 수정 모드 데이터 로드 — 인스턴스 생성과 분리
+  useEffect(() => {
+    if (!quillReady || !isEdit || contentLoaded.current) return
+    contentLoaded.current = true
+    setLoading(true)
+
+    const tryLoad = () => {
+      if (!quillKoInst.current || !quillEnInst.current) {
+        setTimeout(tryLoad, 50)
+        return
+      }
+      fetchColumn(editColId).then(col => {
+        if (!col) { setLoading(false); return }
+        setAuthor(col.author || '')
+        setTitleKo(col.title_ko || '')
+        setTitleEn(col.title_en || '')
+        if (col.thumbnail) {
+          setThumbnail(col.thumbnail)
+          setThumbPreview(col.thumbnail)
+        }
+        if (col.body_ko) quillKoInst.current.clipboard.dangerouslyPasteHTML(col.body_ko)
+        if (col.body_en) quillEnInst.current.clipboard.dangerouslyPasteHTML(col.body_en)
+        setLoading(false)
+      })
+    }
+    setTimeout(tryLoad, 150)
+  }, [quillReady, editColId])
 
   const confirmPw = () => {
     if (pw === PASSWORD) { setAuthed(true); setPwErr(false) }
@@ -175,7 +177,6 @@ export default function Editor({ lang, onClose, onSave, editColId = null }) {
     await onSave()
   }
 
-  // 비밀번호 모달
   if (!authed) {
     return (
       <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,.6)',zIndex:700,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -197,7 +198,6 @@ export default function Editor({ lang, onClose, onSave, editColId = null }) {
 
   return (
     <div style={{position:'fixed',inset:0,background:'var(--bg1,#f8f8f6)',zIndex:995,display:'flex',flexDirection:'column',overflow:'hidden'}}>
-      {/* 헤더 */}
       <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 1.75rem',height:'56px',borderBottom:'1px solid var(--border,#e8e4dc)',background:'#fff',flexShrink:0}}>
         <span style={{fontWeight:700,fontSize:'13px'}}>{isEdit ? '칼럼 수정' : '칼럼 기고'}</span>
         <div style={{display:'flex',gap:'8px',alignItems:'center'}}>
@@ -213,7 +213,6 @@ export default function Editor({ lang, onClose, onSave, editColId = null }) {
         </div>
       </div>
 
-      {/* 메타 */}
       <div style={{display:'flex',gap:'8px',padding:'.75rem 1.75rem',borderBottom:'1px solid var(--border,#e8e4dc)',background:'#fff',flexShrink:0,flexWrap:'wrap',alignItems:'center'}}>
         <input value={author} onChange={e=>setAuthor(e.target.value)} placeholder="저자 이름"
           style={{border:'1px solid var(--border2,#d4cfc6)',borderRadius:'6px',padding:'6px 12px',fontSize:'13px',background:'#f8f8f6',minWidth:'160px'}} />
@@ -230,7 +229,6 @@ export default function Editor({ lang, onClose, onSave, editColId = null }) {
         )}
       </div>
 
-      {/* 본문 */}
       <div style={{flex:1,overflowY:'auto',background:'#f8f8f6'}}>
         {loading && (
           <div style={{textAlign:'center',padding:'2rem',color:'var(--t3,#9aa5b4)'}}>불러오는 중...</div>
